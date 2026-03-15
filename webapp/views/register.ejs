@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sole Traders | Register</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Momo+Trust+Sans:wght@200..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="icon" type="image/png" href="/images/ST.png" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="logo">Sole<span>Traders</span></a>
+
+      <button
+        class="nav-hamburger"
+        id="navToggle"
+        aria-label="Toggle navigation"
+      >
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="nav-right" id="navMenu">
+        <a href="/">Home</a>
+        <a href="/login">Log in</a>
+      </div>
+    </nav>
+    <div class="register-login-section">
+      <div class="register-login-card">
+        <h1 class="register-login-heading">Create an account</h1>
+        <p class="register-login-subheading">
+          Join Sole Traders and start managing your bookings today.
+        </p>
+        <form action="/register" method="POST">
+          <div class="field">
+            <label for="name" class="label">Full name</label>
+            <div class="control">
+              <input
+                type="text"
+                class="input"
+                id="name"
+                name="name"
+                placeholder="Joe Bloggs"
+                required
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="username" class="label">Username</label>
+            <div class="control">
+              <input
+                type="text"
+                class="input"
+                id="username"
+                name="username"
+                placeholder="joebloggs7"
+                required
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="email" class="label">Email address</label>
+            <div class="control">
+              <input
+                type="email"
+                class="input"
+                id="email"
+                name="email"
+                placeholder="joe@example.com"
+                required
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="password" class="label">Password</label>
+            <div class="control">
+              <input
+                type="password"
+                class="input"
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+          </div>
+          <button type="submit" class="btn-primary register-login-btn">
+            Create account
+          </button>
+        </form>
+        <p class="register-login-link">
+          Already have an account? <a href="/login">Log in</a>
+        </p>
+      </div>
+    </div>
+    <footer>
+      <p>
+        Copyright &copy; <%= new Date().getFullYear() %> Sole Traders. All
+        rights reserved.
+      </p>
+    </footer>
+    <script>
+      document.getElementById('navToggle').addEventListener('click', () => {
+        document.getElementById('navMenu').classList.toggle('open');
+      });
+    </script>
+  </body>
+</html>

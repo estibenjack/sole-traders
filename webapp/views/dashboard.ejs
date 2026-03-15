@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sole Traders | <%= trader.name %></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Momo+Trust+Sans:wght@200..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/images/ST.png">
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="logo">Sole<span>Traders</span></a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-right" id="navMenu">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/traders">Browse Traders</a>
+      <a href="/logout">Log out</a>
+    </div>
+  </nav>
+  
+  <!-- dashboard header -->
+  <div class="dashboard-header">
+    <div class="dashboard-header-top">
+      <div>
+        <div class="title-badge-container">
+          <h1><%= trader.name %></h1>
+          <p class="dashboard-username"><%= trader.username %></p>
+        </div>
+        <div class="region-username-container">
+          <% if (trader.region) { %>
+            <p><i class="fa-solid fa-location-dot"></i> <%= trader.region %></p>
+          <% } else { %>
+            <p><i class="fa-solid fa-location-dot"></i> No region added</p>
+          <% } %>
+            <% if (trader.trade_type) { %>
+            <span class="trade-badge"><%= trader.trade_type %></span>
+          <% } %>
+        </div>
+      </div>
+      <a href="/traders/<%= trader.id %>?from=dashboard" class="btn-outline btn-view-public-profile"><i class="fa-solid fa-eye"></i> View public profile</a>
+    </div>
+
+    <!-- tabs -->
+    <div class="dashboard-tabs">
+      <a href="/dashboard?tab=overview" class="dashboard-tab <%= activeTab === 'overview' ? 'active' : '' %>"><i class="fa-solid fa-gauge"></i> Overview</a>
+      <a href="/dashboard?tab=profile" class="dashboard-tab <%= activeTab === 'profile' ? 'active' : '' %>"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="/dashboard?tab=services" class="dashboard-tab <%= activeTab === 'services' ? 'active' : '' %>">
+        <i class="fa-solid fa-briefcase"></i> Services
+        <% if (services.length > 0) { %>
+          <span>
+            <%= services.length %>
+          </span>
+        <% } %>
+      </a>
+      <a href="/dashboard?tab=bookings" class="dashboard-tab <%= activeTab === 'bookings' ? 'active' : '' %>">
+        <i class="fa-solid fa-calendar-check"></i> Bookings
+        <% const pendingCount = bookings.filter(b => b.status === 'pending').length; %>
+        <% if (pendingCount > 0) { %>
+          <span>
+            <%= pendingCount %>
+          </span>
+        <% } %>
+      </a>
+      
+    </div>
+  </div>
+
+  <div class="dashboard-body">
+    <%# conditional toast msg %>
+    <% if (typeof successMsg !== 'undefined' && successMsg) { %>
+      <div class="toast toast-success">
+        <i class="fa-solid fa-circle-check"></i> <%= successMsg %>
+      </div>
+    <% } %>
+    <div class="dashboard-content">
+      <!--overview tab-->
+      <% if (activeTab === 'overview') { %>
+        <div class="columns is-variable is-4 mb-5">
+
+          <%# left: stat cards %>
+          <div class="column is-4-desktop is-12-tablet stats-left">
+            <div class="stat-card mb-3">
+              <div class="stat-icon teal"><i class="fa-solid fa-briefcase"></i></div>
+              <div class="stat-info">
+                <div class="stat-value"><%= stats && stats.bookingsPerService[0] ? stats.bookingsPerService[0].title : '-' %></div>
+                <div class="stat-label">Most booked service</div>
+              </div>
+            </div>
+
+            <div class="stat-card mb-3">
+              <div class="stat-icon purple"><i class="fa-solid fa-calendar"></i></div>
+              <div class="stat-info">
+                <div class="stat-value"><%= stats.avgBookingsPerMonth %></div>
+                <div class="stat-label">Monthly average bookings</div>
+              </div>
+            </div>
+
+            <div class="stat-card mb-3">
+              <div class="stat-icon orange"><i class="fa-solid fa-clock"></i></div>
+              <div class="stat-info">
+                <div class="stat-value"><%= bookings.filter(b => b.status === 'pending').length %></div>
+                <div class="stat-label">Pending bookings</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon gold"><i class="fa-solid fa-star"></i></div>
+              <div class="stat-info">
+                <div class="stat-value"><%= avgRating && avgRating.avg_rating ? avgRating.avg_rating : '-' %></div>
+                <div class="stat-label">Average rating</div>
+              </div>
+            </div>
+          </div>
+
+          <%# right: chart %>
+          <div class="column is-8-desktop is-12-tablet">
+            <div class="dash-card dash-card-full-height">
+              <div class="dash-card-header">
+                <h3><i class="fa-solid fa-chart-pie chart-icon" style="color: var(--accent);"></i> Bookings by Service</h3>
+              </div>
+              
+              <% if (stats.bookingsPerService && stats.bookingsPerService.length > 0) { %>
+                <%# chart.js renders onto canvas %>
+                <div class="chart-container">
+                  <canvas id="bookingsChart"></canvas>
+                </div>
+              <% } else { %>
+                <div class="no-chart-container">
+                  <div class="empty-msg">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <p>No booking data yet.</p>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+        </div>
+
+        <%# recent bookings preview %>
+        <div class="dash-card">
+          <div class="dash-card-header bookings-preview">
+            <h3><i class="fa-solid fa-clock"></i> Recent Bookings</h3>
+            <a href="/dashboard?tab=bookings">View all <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <% const recentBookings = bookings.slice(0, 4); %>
+          <% if (recentBookings.length > 0) { %>
+
+          <div class="table-scroll-x">
+            <table class="table is-fullwidth dash-table">
+              <thead>
+                <tr>
+                  <th>Clients</th>
+                  <th class="hide-mobile">Service</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentBookings.forEach(booking => { %>
+                  <tr>
+                    <td><strong><%= booking.client_name %></strong><br><small class=".text-muted"><%= booking.client_email %></small></td>
+                    <td class="hide-mobile"><%= booking.service_title || '-' %></td>
+                    <td><%= new Date(booking.requested_date).toLocaleDateString('en-GB') %> at <%= booking.requested_time ? booking.requested_time.substring(0,5) : '-' %></td>
+                    <td><span class="status-badge <%= booking.status %>"><%= booking.status[0].toUpperCase() + booking.status.slice(1)%></span></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+
+          <% } else { %>
+
+            <div class="empty-msg">
+              <i class="fa-solid fa-calendar-xmark"></i>
+              <p>No bookings yet.</p>
+            </div>
+
+          <% } %>
+        </div>
+
+        <!--services preview-->
+        <div class="dash-card">
+          <div class="dash-card-header services-preview">
+            <h3><i class="fa-solid fa-briefcase"></i> Your Services</h3>
+            <a href="/dashboard?tab=services">Manage <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <% if (services.length > 0) { %>
+            <% services.slice(0,3).forEach(service => { %>
+              <div class="mini-service-card">
+                <div>
+                  <h4><%= service.title %></h4>
+                  <p><%= service.pricing_type === 'hourly' ? 'Hourly rate' : 'Fixed price' %></p>
+                </div>
+                <span class="price">£<%= parseFloat(service.base_price).toFixed(2) %></span>
+              </div>
+            <% }) %>
+            <% if (services.length > 3) { %>
+              <p class="services-overflow-link">
+                + <%= services.length - 3 %> more - <a href="/dashboard?tab=services">view all</a>
+              </p>
+            <% } %>
+          <% } else { %>
+
+            <div class="empty-msg">
+              <i class="fa-solid fa-plus-circle"></i>
+              <p>No services listed yet.</p>
+              <a href="/dashboard?tab=services" class="btn-primary btn-sm">Add your first service</a>
+            </div>
+
+          <% } %>
+        </div>
+
+      <% } %>
+
+      <% if (activeTab === 'profile') { %>
+
+        <% if (!editMode) { %>
+          <div class="dash-card">
+            <div class="dash-card-header profile-tab-header">
+              <h2 class="profile-section-title">Your Info</h2>
+              <a href="/dashboard?tab=profile&edit=true" class="btn-primary">
+                <i class="fa-solid fa-pen"></i> Edit profile
+              </a>
+            </div>
+            <div class="profile-info-row">
+              <span class="profile-info-label">Name</span>
+              <span class="profile-info-value"><%= trader.name %></span>
+            </div>
+          
+            <div class="profile-info-row">
+              <span class="profile-info-label">Username</span>
+              <span class="profile-info-value username"><%= trader.username %></span>
+            </div>
+
+            <div class="profile-info-row">
+              <span class="profile-info-label">Email</span>
+              <span class="profile-info-value"><%= trader.email %></span>
+            </div>
+
+            <div class="profile-info-row">
+              <span class="profile-info-label">Trade type</span>
+              <span class="profile-info-value <%= trader.trade_type ? '' : 'not-added-yet' %>"><%= trader.trade_type || 'No trade type added' %></span>
+            </div>
+
+            <div class="profile-info-row">
+              <span class="profile-info-label">Region</span>
+              <span class="profile-info-value <%= trader.region ? '' : 'not-added-yet' %>"><%= trader.region || 'No region added' %></span>
+            </div>
+
+            <div class="profile-info-row">
+              <span class="profile-info-label">Bio</span>
+              <span class="profile-info-value <%= trader.bio ? '' : 'not-added-yet' %>"><%= trader.bio || 'No bio added' %></span>
+            </div>
+
+          </div>
+        <% } else { %>
+          <!--edit profile mode-->
+          <div class="dash-card profile-form-section">
+            <div class="dash-card-header">
+              <h2 class="profile-section-title">Edit Profile</h2>
+              <a href="/dashboard?tab=profile" class="btn-outline-dark btn-sm">
+                <i class="fa-solid fa-xmark"></i> Cancel
+              </a>
+            </div>
+
+            <% if (typeof profileError !== 'undefined' && profileError) { %>
+              <div class="error-message"><%= profileError %></div>
+            <% } %>
+
+            <form action="/profile/edit" method="POST">
+
+              <!--name + email-->
+              <div class="columns">
+
+                <div class="column">
+                  <div class="field">
+                    <label for="name" class="label">Name</label>
+                    <div class="control">
+                      <input type="text" class="input" id="name" name="name" value="<%= trader.name %>" required >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="column">
+                  <div class="field">
+                    <label for="email" class="label">Email</label>
+                    <div class="control">
+                      <input type="email" class="input" id="email" name="email" value="<%= trader.email %>" required >
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="columns">
+                <div class="column">
+                  <div class="field">
+                    <label class="label" for="trade_type">Trade type</label>
+                    <div class="control">
+                      <div class="select is-fullwidth">
+                        <select name="trade_type" id="trade_type">
+                          <option value="">Select a trade type</option>
+                          <% tradeTypes.forEach(type => { %>
+                            <option value="<%= type %>" <%= trader.trade_type === type ? 'selected' : '' %>><%= type %></option>
+                          <% }) %>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="field">
+                    <label class="label" for="region">Region</label>
+                    <div class="control">
+                      <div class="select is-fullwidth">
+                        <select name="region" id="region">
+                          <option value="">Select a region</option>
+                          <% regions.forEach(r => { %>
+                            <option value="<%= r %>" <%= trader.region === r ? 'selected' : '' %>><%= r %></option>
+                          <% }) %>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+            <!--bio -->
+            <div class="field">
+              <label for="bio" class="label">Bio</label>
+              <div class="control">
+                <textarea name="bio" id="bio" class="textarea" rows="4" placeholder="Tell clients about yourself and your work..."><%= trader.bio || '' %></textarea>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i> Save changes
+              </button>
+              <a href="/dashboard?tab=profile" class="btn-outline-dark">Cancel</a>
+            </div>
+
+            </form>
+
+          </div>
+        <% } %>
+      
+      <% } %>
+
+      <!--services tab-->
+      <% if (activeTab === 'services') { %>
+
+        <% const serviceToEdit = editServiceId ? services.find(s => s.id === editServiceId) : null; %>
+
+        <% if (serviceToEdit) { %>
+          <!-- ── Edit service mode ── -->
+          <div class="dash-card mb-4">
+            <div class="dash-card-header">
+              <h2 class="profile-section-title">Edit Service</h2>
+              <a href="/dashboard?tab=services" class="btn-outline-dark btn-sm" >
+                <i class="fa-solid fa-xmark"></i> Cancel
+              </a>
+            </div>
+
+            <form action="/services/edit/<%= serviceToEdit.id %>" method="POST">
+
+              <div class="columns">
+                <div class="column is-8">
+                  <div class="field">
+                    <label for="edit_title" class="label">Service title</label>
+                    <div class="control">
+                      <input type="text" class="input" id="edit_title" name="title" value="<%= serviceToEdit.title %>" required>
+                    </div>
+                  </div>
+                </div>
+                <div class="column is-4">
+                  <div class="field">
+                    <label for="edit_pricing_type" class="label">Pricing type</label>
+                    <div class="control">
+                      <div class="select is-fullwidth">
+                        <select name="pricing_type" id="edit_pricing_type" required>
+                          <option value="fixed" <%= serviceToEdit.pricing_type === 'fixed' ? 'selected' : '' %>>Fixed price</option>
+                          <option value="hourly" <%= serviceToEdit.pricing_type === 'hourly' ? 'selected' : '' %>>Hourly rate</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="columns">
+                <div class="column is-8">
+                  <div class="field">
+                    <label class="label" for="edit_description">Description</label>
+                    <div class="control">
+                      <textarea class="textarea" id="edit_description" name="description" rows="3" required><%= serviceToEdit.description %></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="column is-4">
+                  <div class="field">
+                    <label class="label" for="edit_base_price">Price (£)</label>
+                    <div class="control">
+                      <input type="number" class="input" id="edit_base_price" name="base_price" min="0.01" step="0.01" value="<%= parseFloat(serviceToEdit.base_price).toFixed(2) %>" required>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="label" for="edit_duration">Est. duration (mins)</label>
+                    <div class="control">
+                      <input class="input" type="number" id="edit_duration" name="estimated_duration_mins" min="1" value="<%= serviceToEdit.estimated_duration_mins || '' %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn-primary" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i> Save changes
+              </button>
+            </form>
+          </div>
+        <% } else { %>
+
+          <!-- add service mode -->
+          <div class="dash-card mb-4">
+            <h2 class="profile-section-title">Add a Service</h2>
+
+            <form action="/services/add" method="POST">
+
+              <div class="columns">
+                <div class="column is-8">
+                  <div class="field">
+                    <label for="title" class="label">Service title</label>
+                    <div class="control">
+                      <input type="text" class="input" id="title" name="title" placeholder="e.g. Boiler installation" required>
+                    </div>
+                  </div>
+                </div>
+                <div class="column is-4">
+                  <div class="field">
+                    <label for="pricing_type" class="label">Pricing type</label>
+                    <div class="control">
+                      <div class="select is-fullwidth">
+                        <select name="pricing_type" id="pricing_type" required>
+                          <option value="fixed">Fixed price</option>
+                          <option value="hourly">Hourly rate</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="columns">
+                <div class="column is-8">
+                  <div class="field">
+                    <label class="label" for="description">Description</label>
+                    <div class="control">
+                      <textarea class="textarea" id="description" name="description" rows="3" placeholder="Describe what's included..." required></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="column is-4">
+                  <div class="field">
+                    <div class="label" for="base_price">Price (£)</div>
+                    <div class="control">
+                      <input type="number" class="input" id="base_price" name="base_price" min="0.01" step="0.01" placeholder="0.00" required>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="label" for="estimated_duration_mins">Est. duration (mins)</label>
+                    <div class="control">
+                      <input class="input" type="number" id="estimated_duration_mins" name="estimated_duration_mins" min="1" placeholder="e.g. 120" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn-primary" type="submit">
+                <i class="fa-solid fa-plus"></i> Add service
+              </button>
+
+            </form>
+          </div>
+        <% } %>
+        
+
+        <!-- Existing services list -->
+        <div class="dash-card">
+          <h2 class="profile-section-title">Your Services</h2>
+          <% if (services.length > 0) { %>
+            <table class="table is-fullwidth dash-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Pricing</th>
+                  <th>Price</th>
+                  <th class="hide-mobile">Duration</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% services.forEach(service => { %>
+                  <tr>
+                    <td>
+                      <strong><%= service.title %></strong><br>
+                      <small class="hide-mobile text-muted"><%= service.description.length > 60 ? service.description.substring(0,60) + '...' : service.description %></small>
+                    </td>
+                    <td><span class="status-badge <%= service.pricing_type === 'hourly' ? 'pending' : 'confirmed' %>"><%= service.pricing_type %></span></td>
+                    <td>£<%= parseFloat(service.base_price).toFixed(2) %></td>
+                    <td class="hide-mobile"><%= service.estimated_duration_mins ? service.estimated_duration_mins + ' mins' : '—' %></td>
+                    <td>
+                      <div class="service-actions">
+                        <a href="/dashboard?tab=services&edit=<%= service.id %>" class="btn-accept">Edit</a>
+                        <form action="/services/delete/<%= service.id %>" method="POST" class="form-inline">
+                          <%# confirm alert to confirm delete %>
+                          <button type="submit" class="btn-reject" onclick="return confirm('Delete this service?')">Delete</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } else { %>
+            <div class="empty-msg">
+              <i class="fa-solid fa-briefcase"></i>
+              <p>No services listed yet. Add your first service above.</p>
+            </div>
+          <% } %>
+        </div>
+
+      <% } %>
+
+      <!--bookings tab -->
+      <% if (activeTab === 'bookings') { %>
+
+        <!-- Status filter -->
+        <%
+          const statusFilter = typeof bookingStatus !== 'undefined' ? bookingStatus : 'all';
+          const filteredBookings = statusFilter === 'all' ? bookings : bookings.filter(b => b.status === statusFilter);
+        %>
+
+        <div class="booking-filter">
+          <a href="/dashboard?tab=bookings" class="filter-tab <%= statusFilter === 'all' ? 'active' : '' %>">All (<%= bookings.length %>)</a>
+          <a href="/dashboard?tab=bookings&status=pending" class="filter-tab <%= statusFilter === 'pending' ? 'active' : '' %>">Pending (<%= bookings.filter(b => b.status === 'pending').length %>)</a>
+          <a href="/dashboard?tab=bookings&status=confirmed" class="filter-tab <%= statusFilter === 'confirmed' ? 'active' : '' %>">Confirmed (<%= bookings.filter(b => b.status === 'confirmed').length %>)</a>
+          <a href="/dashboard?tab=bookings&status=rejected" class="filter-tab <%= statusFilter === 'rejected' ? 'active' : '' %>">Rejected (<%= bookings.filter(b => b.status === 'rejected').length %>)</a>
+        </div>
+
+        <div class="dash-card">
+          <% if (filteredBookings.length > 0) { %>
+            <div class="table-scroll-x">
+              <table class="table is-fullwidth dash-table">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Service</th>
+                    <th class="hide-mobile">Location</th>
+                    <th>Date & Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% filteredBookings.forEach(booking => { %>
+                    <tr>
+                      <td>
+                        <strong><%= booking.client_name %></strong><br>
+                        <small class=".text-muted"><%= booking.client_email %></small>
+                      </td>
+                      <td><%= booking.service_title || '—' %></td>
+                      <td class="hide-mobile text-sm"><%= booking.job_location %></td>
+                      <td class="text-sm">
+                        <%= new Date(booking.requested_date).toLocaleDateString('en-GB') %><br>
+                        <small class=".text-muted"><%= booking.requested_time ? booking.requested_time.substring(0,5) : '—' %></small>
+                      </td>
+                      <td><span class="status-badge <%= booking.status %>"><%= booking.status[0].toUpperCase() + booking.status.slice(1) %></span></td>
+                      <td>
+                        <% if (booking.status === 'pending') { %>
+                          <div class="service-actions">
+                            <form action="/bookings/<%= booking.id %>/accept" method="POST" class="form-inline">
+                              <button type="submit" class="btn-accept"><i class="fa-solid fa-check"></i></button>
+                            </form>
+                            <form action="/bookings/<%= booking.id %>/reject" method="POST" class="form-inline">
+                              <button type="submit" class="btn-reject"><i class="fa-solid fa-xmark"></i></button>
+                            </form>
+                          </div>
+                        <% } else { %>
+                          <span class="no-actions-text">No actions</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="empty-msg">
+              <i class="fa-solid fa-calendar-xmark"></i>
+              <p>No <%= statusFilter !== 'all' ? statusFilter : '' %> bookings found.</p>
+            </div>
+          <% } %>
+        </div>
+
+      <% } %>
+
+    </div>
+  </div>
+
+  <!--main content ends - footer below-->
+  <footer>
+    <p>
+      Copyright &copy; <%= new Date().getFullYear() %> Sole Traders. All rights reserved.
+    </p>
+  </footer>
+
+  <!--script tags -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // only render the chart if we're on the overview tab and there's actually booking data
+    <% if (activeTab === 'overview' && stats.bookingsPerService && stats.bookingsPerService.length > 0) { %>
+      const ctx = document.getElementById('bookingsChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          // pull the service titles and booking counts from the stats object passed in from the controller
+          labels: <%- JSON.stringify(stats.bookingsPerService.map(s => s.title)) %>,
+          datasets: [{
+            data: <%- JSON.stringify(stats.bookingsPerService.map(s => s.booking_count)) %>,
+            backgroundColor: [
+              '#7dd3fc', // sky blue
+              '#86efac', // sage green
+              '#fca5a5', // soft red
+              '#d8b4fe', // lavender
+              '#fdba74', // peach
+              '#6ee7b7', // mint
+              '#f9a8d4', // pink
+              '#a5b4fc', // periwinkle
+              '#fde68a', // butter yellow
+              '#94a3b8', // slate
+            ],
+            borderWidth: 2,
+            borderColor: '#f7f5f0'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 16,
+                font: { size: 13 }
+              }
+            },
+            // custom tooltip to show the booking count and percentage of total
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = ((context.parsed / total) * 100).toFixed(1);
+                  return ` ${context.label}: ${context.parsed} bookings (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    <% } %>
+    // nav hamburger toggle for mobile
+    document.getElementById('navToggle').addEventListener('click', () => {
+      document.getElementById('navMenu').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

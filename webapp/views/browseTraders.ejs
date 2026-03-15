@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Sole Traders | Browse Traders</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Momo+Trust+Sans:wght@200..800&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="/css/styles.css" />
+      <link rel="icon" type="image/png" href="/images/ST.png">
+    </head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="logo">Sole<span>Traders</span></a>
+
+      <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="nav-right" id="navMenu">
+        <% if (user && user.loggedIn) { %>
+          <a href="/">Home</a>
+          <a href="/dashboard">Dashboard</a>
+          <a href="/traders">Browse Traders</a>
+          <a href="/logout">Log out</a>
+        <% } else { %>
+          <a href="/">Home</a>
+          <a href="/traders">Browse Traders</a>
+          <a href="/login">Trader Login</a>
+        <% } %>
+      </div>
+    </nav>
+    <div class="back-link-container">
+      <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i>Back to Home</a> 
+    </div>
+    <div class="page-header dark-section">
+      <h1>Browse Traders</h1>
+      <p>Find a trusted tradesperson in your area</p>
+    </div>
+
+    <!-- filter bar -->
+    <section class="section pt-4 pb-4">
+      <div class="filter-bar container">
+        <form action="/traders" method="GET" class="filter-form">
+
+          <div class="filter-group">
+            <label class="label" for="trade_type">Trade type</label>
+            <div class="control">
+              
+              <div class="select">
+                <select name="trade_type" id="trade_type">
+                  <option value="">All trades</option>
+                  <% if (typeof tradeTypes !== 'undefined') { %>
+                    <% tradeTypes.forEach(type => { %>
+                      <option value="<%= type %>" <%= selectedTradeType === type ? 'selected' : '' %>>
+                        <%= type %>
+                      </option>
+                    <% }) %>
+                  <% } %>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="label" for="region">Region</label>
+            <div class="control">
+              <div class="select">
+                <select name="region" id="region">
+                  <option value="">All regions</option>
+                  <% if (typeof regions !== 'undefined') { %>
+                    <% regions.forEach(region => { %>
+                      <option value="<%= region %>" <%= selectedRegion === region ? 'selected' : '' %>>
+                        <%= region %>
+                      </option>
+                    <% }) %>
+                  <% } %>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button type="submit" class="btn-primary">
+              <i class="fa-solid fa-filter"></i> Filter
+            </button>
+            <a href="/traders" class="btn-outline-dark">Clear</a>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <div class="results-section pb-4">
+
+      <!-- results -->
+       <section class="section pt-0 pb-2">
+        <div class="container">
+          <p class="results-count">
+            <% if (typeof traders !== 'undefined') { %>
+              Showing <strong><%= traders.length %></strong> trader<%= traders.length !== 1 ? 's' : '' %>
+            <% } %>
+          </p>
+        </div>
+      </section>
+  
+      <!-- trader cards -->
+      <section class="section pt-2 pb-2">
+        <div class="container">
+  
+          <% if (typeof traders !== 'undefined' && traders.length > 0) { %>
+            <div class="columns is-multiline">
+              <% traders.forEach(trader => { %>
+                <div class="column is-4-desktop is-6-tablet is-12-mobile">
+                  <div class="trader-card">
+  
+                    <!-- card header -->
+                    <div class="trader-card-header">
+                      <div class="trader-avatar">
+                        <%= trader.name.charAt(0).toUpperCase() %>
+                      </div>
+                      <div class="trader-card-title">
+                        <h2><%= trader.name %></h2>
+                        <% if (trader.trade_type || trader.avg_rating) { %>
+                          <div class="trader-badge-and-rating">
+                            <% if (trader.trade_type) { %>
+                              <span class="trade-badge"><%= trader.trade_type %></span>
+                            <% } %>
+                            <% if (trader.avg_rating) { %>
+                              <span class="rating-badge">
+                                <i class="fa-solid fa-star"></i> <%= trader.avg_rating %>
+                              </span>
+                            <% } %>
+                          </div>
+                        <% } %>
+                      </div>
+                    </div>
+  
+                    <!-- card body -->
+                    <div class="trader-card-body">
+                      <% if (trader.region) { %>
+                        <p class="trader-region">
+                          <i class="fa-solid fa-location-dot"></i> <%= trader.region %>
+                        </p>
+                      <% } else { %>
+                        <p class="trader-region no-region">
+                          <i class="fa-solid fa-location-dot"></i> <span>No location available</span>
+                        </p>
+                      <% } %>
+                      <% if (trader.bio) { %>
+                        <p class="trader-bio"><%= trader.bio.length > 100 ? trader.bio.substring(0, 100) + '...' : trader.bio %></p>
+                      <% } else { %>
+                        <p class="no-bio">This trader hasn't added a bio yet.</p>
+                      <% } %>
+                    </div>
+  
+                    <!-- card footer -->
+                    <div class="trader-card-footer">
+                      <a href="/traders/<%= trader.id %>" class="btn-primary btn-full">
+                        View Profile <i class="fa-solid fa-arrow-right"></i>
+                      </a>
+                    </div>
+  
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+  
+          <% } else { %>
+            <div class="empty-msg browse-traders">
+              <i class="fa-solid fa-hard-hat"></i>
+              <h3>No traders found :&#40;</h3>
+              <p>Try adjusting your filters or check back soon.</p>
+              <a href="/traders" class="btn-outline-dark">Clear filters</a>
+            </div>
+          <% } %>
+  
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <p>
+        Copyright &copy; <%= new Date().getFullYear() %> Sole Traders. All
+        rights reserved.
+      </p>
+    </footer>
+    <script>
+      document.getElementById('navToggle').addEventListener('click', () => {
+        document.getElementById('navMenu').classList.toggle('open');
+      });
+    </script>
+  </body>
+</html>
