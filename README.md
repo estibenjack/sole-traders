@@ -19,6 +19,26 @@ The web app never interacts with the database directly. All data operations go t
 
 ---
 
+## Screenshots
+
+### Home
+
+![Home page](screenshots/home.png)
+
+### Browse Traders
+
+![Browse traders](screenshots/browse-traders.png)
+
+### Trader Profile
+
+![Trader profile](screenshots/trader-profile.png)
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+---
+
 ## Tech Stack
 
 | Layer          | Technology              |
