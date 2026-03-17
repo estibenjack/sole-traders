@@ -9,15 +9,43 @@ const BrowseTradersPage = () => {
   const [selectedTradeType, setSelectedTradeType] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
 
+  // useEffect(() => {
+  //   axios
+  //     .get('http://localhost:3002/traders')
+  //     .then((res) => {
+  //       setTraders(res.data.result);
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       console.log('Error fetching traders:', err);
+  //       setError('Failed to load traders');
+  //       setLoading(false);
+  //     });
+  // }, []);
+
   useEffect(() => {
-    axios
-      .get('http://localhost:3002/traders')
-      .then((res) => {
-        setTraders(res.data.result);
+    Promise.all([
+      axios.get('http://localhost:3002/traders'),
+      axios.get('http://localhost:3002/ratings/averages')
+    ])
+      .then(([tradersRes, ratingsRes]) => {
+        const traders = tradersRes.data.result;
+        const ratings = ratingsRes.data.result;
+
+        // merge avg_rating into each trader object
+        const tradersWithRatings = traders.map((trader) => {
+          const ratingData = ratings.find((r) => r.trader_id === trader.id);
+          return {
+            ...trader,
+            avg_rating: ratingData ? ratingData.avg_rating : null
+          };
+        });
+
+        setTraders(tradersWithRatings);
         setLoading(false);
       })
       .catch((err) => {
-        console.log('Error fetching traders:', err);
+        console.log('Error fetching data:', err);
         setError('Failed to load traders');
         setLoading(false);
       });
@@ -119,7 +147,7 @@ const BrowseTradersPage = () => {
       </section>
 
       {/* results */}
-      <div className="results-section pb-4">
+      <div className="results-section pb-4" style={{ flex: 1 }}>
         <section className="section pt-0 pb-2">
           <div className="container">
             <p className="results-count">
