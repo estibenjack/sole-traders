@@ -5,6 +5,7 @@ import BrowseTradersPage from './pages/BrowseTradersPage';
 import NotFoundPage from './pages/NotFoundPage';
 import MainLayout from './components/ui/MainLayout';
 import FullHeightLayout from './components/ui/FullHeightLayout';
+import HomePage from './pages/HomePage';
 
 const App = () => {
   return (
@@ -15,8 +16,8 @@ const App = () => {
         <Route
           path="/"
           element={
-            <FullHeightLayout>
-              <div
+            <MainLayout>
+              {/* <div
                 className="error-404-container"
                 style={{ flexDirection: 'column' }}
               >
@@ -32,8 +33,9 @@ const App = () => {
                 <p style={{ color: '#aaa', fontSize: '1.1rem' }}>
                   Check back in a bit!
                 </p>
-              </div>
-            </FullHeightLayout>
+              </div> */}
+              <HomePage />
+            </MainLayout>
           }
         />
         <Route
