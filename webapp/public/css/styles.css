@@ -177,9 +177,7 @@ footer p {
   margin: 0;
 }
 
-/* ==========================================================
-   5. HERO & HOME
-   ========================================================== */
+/* -- hero  & home -- */
 .hero-section {
   background-color: var(--brand);
   padding: 5rem 2rem 4rem;
