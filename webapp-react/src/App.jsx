@@ -6,6 +6,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import MainLayout from './components/ui/MainLayout';
 import FullHeightLayout from './components/ui/FullHeightLayout';
 import HomePage from './pages/HomePage';
+import TraderProfilePage from './pages/TraderProfilePage';
 
 const App = () => {
   return (
@@ -52,6 +53,14 @@ const App = () => {
             <FullHeightLayout>
               <NotFoundPage />
             </FullHeightLayout>
+          }
+        />
+        <Route
+          path="/traders/:id"
+          element={
+            <MainLayout>
+              <TraderProfilePage />
+            </MainLayout>
           }
         />
       </Routes>
