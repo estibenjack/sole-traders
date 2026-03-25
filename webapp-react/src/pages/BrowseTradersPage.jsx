@@ -157,7 +157,7 @@ const BrowseTradersPage = () => {
           </div>
         </section>
 
-        <section className="section pt-2 pb-2">
+        <section className="section pt-1 pb-1">
           <div className="container">
             {filteredTraders.length > 0 ? (
               <div className="columns is-multiline">
@@ -172,7 +172,9 @@ const BrowseTradersPage = () => {
               </div>
             ) : (
               <div className="empty-msg browse-traders">
-                <p>No traders found matching your search.</p>
+                <i class="fa-solid fa-hard-hat"></i>
+                <h3>No traders found :&#40;</h3>
+                <p>Try adjusting your filters or check back soon.</p>
                 <button className="btn-outline-dark" onClick={clearFilters}>
                   Clear filters
                 </button>
