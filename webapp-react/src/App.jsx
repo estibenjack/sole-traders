@@ -1,17 +1,16 @@
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/ui/Navbar';
-import Footer from './components/ui/Footer';
 import BrowseTradersPage from './pages/BrowseTradersPage';
 import NotFoundPage from './pages/NotFoundPage';
 import MainLayout from './components/ui/MainLayout';
 import FullHeightLayout from './components/ui/FullHeightLayout';
 import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import TraderProfilePage from './pages/TraderProfilePage';
 
 const App = () => {
   return (
     <>
-      {/* <Navbar /> */}
       {/* todo: refactor to use createBrowserRouter */}
       <Routes>
         <Route
@@ -63,8 +62,23 @@ const App = () => {
             </MainLayout>
           }
         />
+        <Route
+          path="/login"
+          element={
+            <FullHeightLayout>
+              <LoginPage />
+            </FullHeightLayout>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <FullHeightLayout>
+              <RegisterPage />
+            </FullHeightLayout>
+          }
+        />
       </Routes>
-      {/* <Footer /> */}
     </>
   );
 };
