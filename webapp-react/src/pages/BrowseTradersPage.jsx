@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import TraderCard from '../components/traders/TraderCard';
+import { useNavigate } from 'react-router-dom';
 
 const BrowseTradersPage = () => {
+  const navigate = useNavigate();
   const [traders, setTraders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -80,6 +82,13 @@ const BrowseTradersPage = () => {
 
   return (
     <>
+      {/* back link */}
+      <div className="back-link-container">
+        <button className="back-link" onClick={() => navigate(-1)}>
+          <i className="fa-solid fa-arrow-left"></i> Back
+        </button>
+      </div>
+
       {/* page header */}
       <div className="page-header dark-section">
         <h1>Browse Traders</h1>
