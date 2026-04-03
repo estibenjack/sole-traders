@@ -1,13 +1,11 @@
-import Navbar from './Navbar';
+import AuthNavbar from './AuthNavbar';
 import Footer from './Footer';
 
-const FullHeightLayout = ({ children }) => {
+const FullHeightLayout = ({ children, variant }) => {
   return (
     <div className="full-height-page">
-      <Navbar />
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {children}
-      </main>
+      <AuthNavbar variant={variant} />
+      {children}
       <Footer />
     </div>
   );
