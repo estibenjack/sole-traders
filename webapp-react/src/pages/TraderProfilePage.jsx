@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ProfileHero from '../components/traderProfile/ProfileHero';
 import AboutSection from '../components/traderProfile/AboutSection';
@@ -10,6 +10,7 @@ import ReviewsList from '../components/traderProfile/ReviewsList';
 
 const TraderProfilePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   // state variables
   const [trader, setTrader] = useState(null);
@@ -122,14 +123,13 @@ const TraderProfilePage = () => {
     <>
       {/* back link */}
       <div className="back-link-container">
-        <Link to="/traders" className="back-link">
-          <i className="fa-solid fa-arrow-left"></i> Back to Traders
-        </Link>
+        <button className="back-link" onClick={() => navigate(-1)}>
+          <i className="fa-solid fa-arrow-left"></i> Back
+        </button>
       </div>
 
       {/* profile hero */}
       <ProfileHero trader={trader} avgRating={avgRating} />
-
       {/* main content */}
       <div className="main-content-container">
         <div className="main-content">
