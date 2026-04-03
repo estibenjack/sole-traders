@@ -65,7 +65,7 @@ const App = () => {
         <Route
           path="/login"
           element={
-            <FullHeightLayout>
+            <FullHeightLayout variant="login">
               <LoginPage />
             </FullHeightLayout>
           }
@@ -73,7 +73,7 @@ const App = () => {
         <Route
           path="/register"
           element={
-            <FullHeightLayout>
+            <FullHeightLayout variant="register">
               <RegisterPage />
             </FullHeightLayout>
           }
