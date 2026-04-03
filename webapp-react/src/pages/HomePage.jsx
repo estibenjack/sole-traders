@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import FeatureCard from '../components/home/FeatureCard';
 
 const HomePage = () => {
   return (
@@ -33,42 +34,24 @@ const HomePage = () => {
         <p className="features-question">Why Sole Traders?</p>
         <h2>Everything you need, done right</h2>
         <div className="columns is-multiline is-centered">
-          <div className="column">
-            <div className="feature-card">
-              <div className="feature-icon home-mg">
-                <i className="fa-solid fa-magnifying-glass"></i>
-              </div>
-              <h3>Find the right trader</h3>
-              <p>
-                Find plumbers, electricians, carpenters and more — filter by
-                trade type and region to find the right person for the job.
-              </p>
-            </div>
-          </div>
-          <div className="column">
-            <div className="feature-card">
-              <div className="feature-icon home-cal">
-                <i className="fa-solid fa-calendar-days"></i>
-              </div>
-              <h3>Book instantly</h3>
-              <p>
-                Submit a booking request directly to a trader in seconds. No
-                account needed — just fill in your details and go.
-              </p>
-            </div>
-          </div>
-          <div className="column">
-            <div className="feature-card">
-              <div className="feature-icon home-star">
-                <i className="fa-solid fa-star"></i>
-              </div>
-              <h3>Rated traders</h3>
-              <p>
-                See star ratings from real customers before you book. Only hire
-                traders you can trust.
-              </p>
-            </div>
-          </div>
+          <FeatureCard
+            icon="fa-magnifying-glass"
+            iconClass="home-mg"
+            title="Find the right trader"
+            description="Find plumbers, electricians, carpenters and more — filter by trade type and region to find the right person for the job."
+          />
+          <FeatureCard
+            icon="fa-calendar-days"
+            iconClass="home-cal"
+            title="Book instantly"
+            description="Submit a booking request directly to a trader in seconds. No account needed — just fill in your details and go."
+          />
+          <FeatureCard
+            icon="fa-star"
+            iconClass="home-star"
+            title="Rated traders"
+            description="See star ratings from real customers before you book. Only hire traders you can trust."
+          />
         </div>
       </section>
 
