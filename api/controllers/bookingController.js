@@ -67,26 +67,27 @@ exports.getBookingsByTrader = (req, res) => {
 };
 
 exports.addBooking = (req, res) => {
-  const {
-    trader_id,
-    service_id,
-    client_name,
-    client_email,
-    job_location,
-    requested_date,
-    requested_time,
-    job_description
-  } = req.body;
+  const clientName = req.body.client_name
+    ? req.body.client_name.trim().replace(/\b\w/g, (c) => c.toUpperCase())
+    : '';
+  const clientEmail = req.body.client_email
+    ? req.body.client_email.trim().toLowerCase()
+    : '';
+  const jobLocation = req.body.job_location ? req.body.job_location.trim() : '';
+  const jobDescription = req.body.job_description
+    ? req.body.job_description.trim()
+    : '';
+  const { trader_id, service_id, requested_date, requested_time } = req.body;
 
   if (
     !trader_id ||
     !service_id ||
-    !client_name ||
-    !client_email ||
-    !job_location ||
+    !clientName ||
+    !clientEmail ||
+    !jobLocation ||
     !requested_date ||
     !requested_time ||
-    !job_description
+    !jobDescription
   ) {
     res.status(400).json({
       status: 'failure',
@@ -103,12 +104,12 @@ exports.addBooking = (req, res) => {
   const vals = [
     trader_id,
     service_id,
-    client_name,
-    client_email,
-    job_location,
+    clientName,
+    clientEmail,
+    jobLocation,
     requested_date,
     requested_time,
-    job_description
+    jobDescription
   ];
 
   conn.query(insertSQL, vals, (err, resultHeader) => {

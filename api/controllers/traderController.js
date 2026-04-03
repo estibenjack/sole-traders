@@ -97,7 +97,11 @@ exports.addTrader = (req, res) => {
 
 exports.editTrader = (req, res) => {
   const { id } = req.params;
-  const { name, email, trade_type, region, bio } = req.body;
+  const name = req.body.name
+    ? req.body.name.trim().replace(/\b\w/g, (c) => c.toUpperCase())
+    : '';
+  const email = req.body.email ? req.body.email.trim().toLowerCase() : '';
+  const { trade_type, region, bio } = req.body;
 
   // only name and email are required
   if (!name || !email) {

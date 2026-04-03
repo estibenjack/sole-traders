@@ -2,10 +2,9 @@ const conn = require('../utils/dbconn');
 
 exports.getRatingsByTrader = (req, res) => {
   const { id } = req.params;
-  
+
   // ORDER BY.. DESC to get newest first
-  const selectSQL =
-    `SELECT *
+  const selectSQL = `SELECT *
     FROM ratings
     WHERE trader_id = ?
     ORDER BY created_at DESC
@@ -67,9 +66,12 @@ exports.getAverageRating = (req, res) => {
 };
 
 exports.addRating = (req, res) => {
-  const { trader_id, reviewer_name, rating } = req.body;
+  const reviewerName = req.body.reviewer_name
+    ? req.body.reviewer_name.trim().replace(/\b\w/g, (c) => c.toUpperCase())
+    : '';
+  const { trader_id, rating } = req.body;
 
-  if (!trader_id || !reviewer_name || !rating) {
+  if (!trader_id || !reviewerName || !rating) {
     res.status(400).json({
       status: 'failure',
       message: 'All fields are required'
@@ -89,7 +91,7 @@ exports.addRating = (req, res) => {
 
   const insertSQL =
     'INSERT INTO ratings (trader_id, reviewer_name, rating) VALUES (?, ?, ?)';
-  const vals = [trader_id, reviewer_name, ratingNum];
+  const vals = [trader_id, reviewerName, ratingNum];
 
   conn.query(insertSQL, vals, (err, resultHeader) => {
     if (err) {

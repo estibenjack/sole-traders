@@ -1,9 +1,16 @@
 const bcrypt = require('bcrypt');
 const conn = require('../utils/dbconn');
 
-
 exports.register = (req, res) => {
-  const { name, username, email, password } = req.body;
+  // instead of destructuring, declaring each and normalising before query
+  const name = req.body.name
+    ? req.body.name.trim().replace(/\b\w/g, (c) => c.toUpperCase())
+    : '';
+  const username = req.body.username
+    ? req.body.username.trim().toLowerCase()
+    : '';
+  const email = req.body.email ? req.body.email.trim().toLowerCase() : '';
+  const { password } = req.body;
 
   if (!name || !username || !email || !password) {
     res.status(400);
@@ -16,7 +23,6 @@ exports.register = (req, res) => {
   // hash pw w/ bcrypt (10 salt level for lots of protec)
   bcrypt.hash(password, 10, (hashErr, hashedPassword) => {
     if (hashErr) {
-      // console.error('Bcrypt error:', hashErr);
       res.status(500);
       return res.json({
         status: 'failure',
@@ -59,7 +65,11 @@ exports.register = (req, res) => {
 };
 
 exports.login = (req, res) => {
-  const { username, password } = req.body;
+  // instead of destructuring, declaring each and normalising before query
+  const username = req.body.username
+    ? req.body.username.trim().toLowerCase()
+    : '';
+  const { password } = req.body;
 
   if (!username || !password) {
     res.status(400);
