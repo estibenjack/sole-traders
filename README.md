@@ -23,36 +23,40 @@ The React frontend never interacts with the database directly. All data operatio
 
 ### Home
 
-![Home page](screenshots/home.png)
+![Home page](screenshots/home_v2.png)
 
 ### Browse Traders
 
-![Browse traders](screenshots/browse-traders.png)
+![Browse traders](screenshots/browse_traders_v2.png)
+
+### Login
+
+![Login](screenshots/login_v2.png)
 
 ### Trader Profile
 
-![Trader profile](screenshots/trader-profile.png)
+![Trader profile](screenshots/trader_profile_v2.png)
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/dashboard_v2.png)
 
 ---
 
 ## Tech Stack
 
-| Layer          | Technology                          |
-| -------------- | ----------------------------------- |
-| Runtime        | Node.js                             |
-| API Framework  | Express.js                          |
-| Frontend       | React 19, Vite                      |
-| Routing        | React Router v7                     |
-| Styling        | Bulma CSS, custom CSS               |
-| Database       | MySQL                               |
-| Authentication | JWT (jsonwebtoken), bcrypt          |
-| HTTP client    | axios                               |
-| Charts         | Chart.js, react-chartjs-2           |
-| Icons          | Font Awesome                        |
+| Layer          | Technology                 |
+| -------------- | -------------------------- |
+| Runtime        | Node.js                    |
+| API Framework  | Express.js                 |
+| Frontend       | React 19, Vite             |
+| Routing        | React Router v7            |
+| Styling        | Bulma CSS, custom CSS      |
+| Database       | MySQL                      |
+| Authentication | JWT (jsonwebtoken), bcrypt |
+| HTTP client    | axios                      |
+| Charts         | Chart.js, react-chartjs-2  |
+| Icons          | Font Awesome               |
 
 ---
 
