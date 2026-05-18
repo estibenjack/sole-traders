@@ -3,3 +3,4 @@ api/config.env
 webapp/config.env
 api/node_modules/
 webapp/node_modules/
+webapp-react/node_modules/

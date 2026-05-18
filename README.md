@@ -2,7 +2,7 @@
 
 A fullstack web application connecting tradespeople with clients looking to hire their services.
 
-Built as part of **CSC7084 Web Development** at Queen's University Belfast (2025–2026).
+Built as part of **CSC7084 Web Development** at Queen's University Belfast (2025–2026). The frontend has since been migrated to React as a personal development goal after the assessment.
 
 ---
 
@@ -10,12 +10,12 @@ Built as part of **CSC7084 Web Development** at Queen's University Belfast (2025
 
 Sole Traders is a platform where tradespeople can register, manage their profile, list their services and handle incoming booking requests from clients. Clients can browse traders, view their profiles, submit booking requests and leave star ratings — all without needing an account.
 
-The application runs across two independent Node/Express servers:
+The application runs across two independent servers:
 
-- **API** (`port 3002`) — handles all data operations, queries the MySQL database and returns JSON
-- **Web App** (`port 3001`) — handles session management and server-side rendering with EJS
+- **API** (`port 3002`) — Node/Express REST API handling all data operations, querying the MySQL database and returning JSON
+- **React Frontend** (`port 5173`) — Vite-powered React SPA consuming the REST API directly from the browser using JWT for authentication
 
-The web app never interacts with the database directly. All data operations go through axios calls to the REST API, keeping database credentials isolated within the API layer.
+The React frontend never interacts with the database directly. All data operations go through axios calls to the REST API, keeping database credentials isolated within the API layer.
 
 ---
 
@@ -41,17 +41,18 @@ The web app never interacts with the database directly. All data operations go t
 
 ## Tech Stack
 
-| Layer          | Technology              |
-| -------------- | ----------------------- |
-| Runtime        | Node.js                 |
-| Framework      | Express.js              |
-| Templating     | EJS                     |
-| Styling        | Bulma CSS, custom CSS   |
-| Database       | MySQL                   |
-| Authentication | express-session, bcrypt |
-| HTTP client    | axios                   |
-| Charts         | Chart.js                |
-| Icons          | Font Awesome            |
+| Layer          | Technology                          |
+| -------------- | ----------------------------------- |
+| Runtime        | Node.js                             |
+| API Framework  | Express.js                          |
+| Frontend       | React 19, Vite                      |
+| Routing        | React Router v7                     |
+| Styling        | Bulma CSS, custom CSS               |
+| Database       | MySQL                               |
+| Authentication | JWT (jsonwebtoken), bcrypt          |
+| HTTP client    | axios                               |
+| Charts         | Chart.js, react-chartjs-2           |
+| Icons          | Font Awesome                        |
 
 ---
 
@@ -60,11 +61,11 @@ The web app never interacts with the database directly. All data operations go t
 **Trader functionality:**
 
 - Register and login with bcrypt password hashing (salt rounds: 10)
-- Session-based authentication with protected routes via `isAuth` middleware
-- Dashboard with tabbed navigation - Overview, Profile, Services, Bookings
-- Profile management - trade type, region and bio
-- Service management - add, edit and delete service listings
-- Booking management - view, filter by status, accept and reject bookings
+- JWT authentication — token issued on login, stored in localStorage, sent as Bearer header on protected requests
+- Dashboard with tabbed navigation — Overview, Profile, Services, Bookings
+- Profile management — trade type, region and bio
+- Service management — add, edit and delete service listings
+- Booking management — view, filter by status, accept and reject bookings
 - Overview tab with Chart.js doughnut chart showing bookings by service and monthly average stat
 
 **Client functionality:**
@@ -77,6 +78,7 @@ The web app never interacts with the database directly. All data operations go t
 **System:**
 
 - REST API with full CRUD operations across all entities
+- JWT middleware protecting mutating and private endpoints
 - Consistent JSON response structure across all endpoints
 - Input validation at both client-side (HTML attributes) and server-side (API controllers)
 - Input normalisation — trimming, lowercasing, title-casing, etc.
@@ -98,6 +100,8 @@ sole-traders/
 │   │   ├── ratingController.js
 │   │   ├── serviceController.js
 │   │   └── traderController.js
+│   ├── middleware/
+│   │   └── auth.js
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   ├── availabilityRoutes.js
@@ -108,41 +112,56 @@ sole-traders/
 │   ├── sql/
 │   │   └── sole_traders_schema.sql
 │   ├── utils/
-│   │   └── dbconn.js
+│   │   ├── dbconn.js
+│   │   └── validate.js
 │   ├── app.js
 │   ├── config.env
 │   └── server.js
-└── webapp/
-    ├── controllers/
-    │   └── webAppController.js
-    ├── middleware/
-    │   └── middleware.js
+└── webapp-react/
     ├── public/
-    │   ├── css/
+    ├── src/
+    │   ├── components/
+    │   │   ├── dashboard/
+    │   │   │   ├── DashboardHeader.jsx
+    │   │   │   └── tabs/
+    │   │   │       ├── BookingsTab.jsx
+    │   │   │       ├── OverviewTab.jsx
+    │   │   │       ├── ProfileTab.jsx
+    │   │   │       └── ServicesTab.jsx
+    │   │   ├── home/
+    │   │   │   └── FeatureCard.jsx
+    │   │   └── ui/
+    │   │       ├── AuthNavbar.jsx
+    │   │       ├── Footer.jsx
+    │   │       ├── FullHeightLayout.jsx
+    │   │       ├── MainLayout.jsx
+    │   │       ├── Navbar.jsx
+    │   │       └── ProtectedRoute.jsx
+    │   ├── context/
+    │   │   └── AuthContext.jsx
+    │   ├── pages/
+    │   │   ├── BrowseTradersPage.jsx
+    │   │   ├── DashboardPage.jsx
+    │   │   ├── HomePage.jsx
+    │   │   ├── LoginPage.jsx
+    │   │   ├── NotFoundPage.jsx
+    │   │   ├── RegisterPage.jsx
+    │   │   └── TraderProfilePage.jsx
+    │   ├── styles/
     │   │   └── styles.css
-    │   └── images/
-    │       └── ST.png
-    ├── routes/
-    │   └── routes.js
-    ├── utils/
-    │   └── constants.js
-    ├── views/
-    │   ├── browseTraders.ejs
-    │   ├── dashboard.ejs
-    │   ├── error404.ejs
-    │   ├── home.ejs
-    │   ├── login.ejs
-    │   ├── register.ejs
-    │   └── traderProfile.ejs
-    ├── app.js
-    └── config.env
+    │   ├── utils/
+    │   │   └── constants.js
+    │   ├── App.jsx
+    │   └── main.jsx
+    ├── index.html
+    └── vite.config.js
 ```
 
 ---
 
 ## Prerequisites
 
-- Node.js
+- Node.js 18+
 - MySQL (via XAMPP or any MySQL server)
 - npm
 
@@ -175,20 +194,14 @@ DB_HOST=localhost
 DB_USER=root
 DB_PASS=
 DB_NAME=sole_traders
+JWT_SECRET=your-long-random-secret-here
 ```
 
-**4. Create `config.env` in `/webapp`**
-
-```
-PORT=3001
-SECRET=yourchosensecret
-```
-
-**5. Install dependencies**
+**4. Install dependencies**
 
 ```bash
 cd api && npm install
-cd ../webapp && npm install
+cd ../webapp-react && npm install
 ```
 
 ---
@@ -201,43 +214,43 @@ Open two separate terminals:
 # Terminal 1 - API
 cd api && npm start
 
-# Terminal 2 - Web App
-cd webapp && npm start
+# Terminal 2 - React frontend
+cd webapp-react && npm run dev
 ```
 
-Then visit **http://localhost:3001**
+Then visit **http://localhost:5173**
 
 ---
 
 ## REST API Endpoints
 
-All endpoints return JSON with a consistent `status` and `result` or `message` field.
+All endpoints return JSON with a consistent `status` and `result` or `message` field. Endpoints marked 🔒 require a valid `Authorization: Bearer <token>` header.
 
-| Method | Endpoint                    | Description                                    |
-| ------ | --------------------------- | ---------------------------------------------- |
-| POST   | /register                   | Register a new trader                          |
-| POST   | /login                      | Authenticate a trader                          |
-| GET    | /traders                    | Get all traders                                |
-| GET    | /traders/:id                | Get a single trader (public)                   |
-| GET    | /traders/:id/private        | Get a single trader (includes email, username) |
-| PUT    | /traders/:id                | Update a trader's profile                      |
-| DELETE | /traders/:id                | Delete a trader                                |
-| GET    | /services                   | Get all services                               |
-| GET    | /services/:id               | Get a single service                           |
-| GET    | /services/trader/:id        | Get all services for a trader                  |
-| POST   | /services                   | Add a new service                              |
-| PUT    | /services/:id               | Update a service                               |
-| DELETE | /services/:id               | Delete a service                               |
-| GET    | /bookings/:id               | Get a single booking                           |
-| GET    | /bookings/trader/:id        | Get all bookings for a trader                  |
-| GET    | /bookings/trader/:id/stats  | Get booking stats for a trader                 |
-| POST   | /bookings                   | Submit a booking request                       |
-| PUT    | /bookings/:id/status        | Accept or reject a booking                     |
-| GET    | /ratings/trader/:id         | Get all ratings for a trader                   |
-| GET    | /ratings/trader/:id/average | Get a trader's average rating                  |
-| GET    | /ratings/averages           | Get average ratings for all traders            |
-| POST   | /ratings                    | Submit a rating                                |
-| GET    | /availability/trader/:id    | Get availability for a trader                  |
+| Method | Endpoint                    | Auth | Description                                    |
+| ------ | --------------------------- | ---- | ---------------------------------------------- |
+| POST   | /register                   |      | Register a new trader                          |
+| POST   | /login                      |      | Authenticate a trader, returns JWT             |
+| GET    | /traders                    |      | Get all traders                                |
+| GET    | /traders/:id                |      | Get a single trader (public)                   |
+| GET    | /traders/:id/private        | 🔒   | Get a single trader (includes email, username) |
+| PUT    | /traders/:id                | 🔒   | Update a trader's profile                      |
+| DELETE | /traders/:id                | 🔒   | Delete a trader                                |
+| GET    | /services                   |      | Get all services                               |
+| GET    | /services/:id               |      | Get a single service                           |
+| GET    | /services/trader/:id        |      | Get all services for a trader                  |
+| POST   | /services                   | 🔒   | Add a new service                              |
+| PUT    | /services/:id               | 🔒   | Update a service                               |
+| DELETE | /services/:id               | 🔒   | Delete a service                               |
+| GET    | /bookings/:id               | 🔒   | Get a single booking                           |
+| GET    | /bookings/trader/:id        | 🔒   | Get all bookings for a trader                  |
+| GET    | /bookings/trader/:id/stats  | 🔒   | Get booking stats for a trader                 |
+| POST   | /bookings                   |      | Submit a booking request                       |
+| PUT    | /bookings/:id/status        | 🔒   | Accept or reject a booking                     |
+| GET    | /ratings/trader/:id         |      | Get all ratings for a trader                   |
+| GET    | /ratings/trader/:id/average |      | Get a trader's average rating                  |
+| GET    | /ratings/averages           |      | Get average ratings for all traders            |
+| POST   | /ratings                    |      | Submit a rating                                |
+| GET    | /availability/trader/:id    |      | Get availability for a trader                  |
 
 ---
 
@@ -249,19 +262,8 @@ You can log in as any seed trader using their username (e.g. `johnmurphy`) and t
 
 ---
 
-## Development Notes
-
-This project was built as part of a university assignment where the use of frontend JavaScript frameworks was not permitted. As a result, the frontend uses EJS server-side templating rather than a component-based framework.
-
-As a personal development goal, I'm planning to migrate the frontend to React, breaking the EJS views into reusable components and moving data fetching from the webapp server into the browser using the existing REST API directly. This will also involve replacing session-based authentication with JWT.
-
----
-
 ## Planned Improvements
 
-- [ ] React frontend migration
-- [ ] JWT authentication
-- [ ] API key authentication between webapp and API
 - [ ] Trader availability timeslot generation
 - [ ] Overlapping booking detection
 - [ ] Password change functionality
