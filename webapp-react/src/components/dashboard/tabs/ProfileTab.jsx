@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../../context/AuthContext';
 import { TRADE_TYPES, NI_REGIONS } from '../../../utils/constants';
+import API_URL from '../../../utils/api';
 
 const ProfileTab = ({ trader, refresh, showToast }) => {
   const { token } = useAuth();
@@ -29,7 +30,7 @@ const ProfileTab = ({ trader, refresh, showToast }) => {
     setError(null);
     axios
       .put(
-        `http://localhost:3002/traders/${trader.id}`,
+        `${API_URL}/traders/${trader.id}`,
         {
           name: form.name,
           email: form.email,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../utils/api';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const RegisterPage = () => {
     };
 
     axios
-      .post('http://localhost:3002/register', normalisedForm)
+      .post(`${API_URL}/register`, normalisedForm)
       .then((res) => {
         if (res.data.status === 'success') {
           navigate('/login');

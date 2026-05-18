@@ -14,7 +14,7 @@ const app = express();
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173' }));
 
 app.use('/traders', traderRouter);
 app.use('/services', serviceRouter);

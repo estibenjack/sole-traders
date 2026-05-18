@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../../context/AuthContext';
+import API_URL from '../../../utils/api';
 
 const emptyForm = {
   title: '',
@@ -51,7 +52,7 @@ const ServicesTab = ({ trader, services, refresh, showToast }) => {
     setSaving(true);
     axios
       .post(
-        'http://localhost:3002/services',
+        `${API_URL}/services`,
         {
           trader_id: trader.id,
           title: addForm.title.trim(),
@@ -78,7 +79,7 @@ const ServicesTab = ({ trader, services, refresh, showToast }) => {
     setSaving(true);
     axios
       .put(
-        `http://localhost:3002/services/${editServiceId}`,
+        `${API_URL}/services/${editServiceId}`,
         {
           title: editForm.title.trim(),
           description: editForm.description.trim(),
@@ -102,7 +103,7 @@ const ServicesTab = ({ trader, services, refresh, showToast }) => {
   const handleDelete = (id) => {
     if (!window.confirm('Delete this service?')) return;
     axios
-      .delete(`http://localhost:3002/services/${id}`, authHeader)
+      .delete(`${API_URL}/services/${id}`, authHeader)
       .then(() => {
         refresh();
         showToast('Service deleted');

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import TraderCard from '../components/traders/TraderCard';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../utils/api';
 
 const BrowseTradersPage = () => {
   const navigate = useNavigate();
@@ -27,8 +28,8 @@ const BrowseTradersPage = () => {
 
   useEffect(() => {
     Promise.all([
-      axios.get('http://localhost:3002/traders'),
-      axios.get('http://localhost:3002/ratings/averages')
+      axios.get(`${API_URL}/traders`),
+      axios.get(`${API_URL}/ratings/averages`)
     ])
       .then(([tradersRes, ratingsRes]) => {
         const traders = tradersRes.data.result;

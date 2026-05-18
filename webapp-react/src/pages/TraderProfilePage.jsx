@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../utils/api';
 import ProfileHero from '../components/traderProfile/ProfileHero';
 import AboutSection from '../components/traderProfile/AboutSection';
 import ServicesList from '../components/traderProfile/ServicesList';
@@ -40,10 +41,10 @@ const TraderProfilePage = () => {
   // useEffect
   useEffect(() => {
     Promise.all([
-      axios.get(`http://localhost:3002/traders/${id}`),
-      axios.get(`http://localhost:3002/ratings/trader/${id}/average`),
-      axios.get(`http://localhost:3002/services/trader/${id}`),
-      axios.get(`http://localhost:3002/ratings/trader/${id}`)
+      axios.get(`${API_URL}/traders/${id}`),
+      axios.get(`${API_URL}/ratings/trader/${id}/average`),
+      axios.get(`${API_URL}/services/trader/${id}`),
+      axios.get(`${API_URL}/ratings/trader/${id}`)
     ])
       .then(([traderRes, avgRatingRes, servicesRes, reviewsRes]) => {
         setTrader(traderRes.data.result);
@@ -66,7 +67,7 @@ const TraderProfilePage = () => {
   const handleBookingSubmit = (e) => {
     e.preventDefault();
     axios
-      .post('http://localhost:3002/bookings', {
+      .post(`${API_URL}/bookings`, {
         ...bookingForm,
         trader_id: id
       })
@@ -97,7 +98,7 @@ const TraderProfilePage = () => {
   const handleRatingSubmit = (e) => {
     e.preventDefault();
     axios
-      .post('http://localhost:3002/ratings', {
+      .post(`${API_URL}/ratings`, {
         trader_id: id,
         reviewer_name: ratingForm.reviewer_name,
         rating: ratingForm.rating

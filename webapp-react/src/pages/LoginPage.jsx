@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import API_URL from '../utils/api';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post('http://localhost:3002/login', form)
+      .post(`${API_URL}/login`, form)
       .then((res) => {
         if (res.data.status === 'success') {
           login(res.data.result, res.data.token);

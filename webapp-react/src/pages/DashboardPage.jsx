@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
 import OverviewTab from '../components/dashboard/tabs/OverviewTab';
@@ -39,11 +40,11 @@ const DashboardPage = () => {
       try {
         const [traderRes, servicesRes, bookingsRes, ratingRes, statsRes] =
           await Promise.all([
-            axios.get(`http://localhost:3002/traders/${user.id}/private`, authHeader),
-            axios.get(`http://localhost:3002/services/trader/${user.id}`),
-            axios.get(`http://localhost:3002/bookings/trader/${user.id}`, authHeader),
-            axios.get(`http://localhost:3002/ratings/trader/${user.id}/average`),
-            axios.get(`http://localhost:3002/bookings/trader/${user.id}/stats`, authHeader)
+            axios.get(`${API_URL}/traders/${user.id}/private`, authHeader),
+            axios.get(`${API_URL}/services/trader/${user.id}`),
+            axios.get(`${API_URL}/bookings/trader/${user.id}`, authHeader),
+            axios.get(`${API_URL}/ratings/trader/${user.id}/average`),
+            axios.get(`${API_URL}/bookings/trader/${user.id}/stats`, authHeader)
           ]);
         setTrader(traderRes.data.result);
         setServices(servicesRes.data.result);

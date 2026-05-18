@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../../../utils/api';
 import { useAuth } from '../../../context/AuthContext';
 
 const BookingsTab = ({ bookings, refresh, showToast }) => {
@@ -17,7 +18,7 @@ const BookingsTab = ({ bookings, refresh, showToast }) => {
   const updateStatus = (id, status) => {
     axios
       .put(
-        `http://localhost:3002/bookings/${id}/status`,
+        `${API_URL}/bookings/${id}/status`,
         { status },
         authHeader
       )
