@@ -226,6 +226,28 @@ Then visit **http://localhost:5173**
 
 ---
 
+## Deployment
+
+The live version is hosted across three services:
+
+- **Frontend** — [Vercel](https://vercel.com) (`sole-traders.vercel.app`)
+- **API** — [Render](https://render.com) (`sole-traders.onrender.com`)
+- **Database** — [Railway](https://railway.app) (MySQL)
+
+Environment variables required on Render:
+
+| Key | Description |
+| ----------- | ------------------------------------ |
+| `DB_HOST` | Railway MySQL host |
+| `DB_PORT` | Railway MySQL port |
+| `DB_USER` | Railway MySQL user |
+| `DB_PASS` | Railway MySQL password |
+| `DB_NAME` | Railway MySQL database name |
+| `JWT_SECRET` | Secret key for signing JWTs |
+| `ALLOWED_ORIGIN` | Vercel frontend URL (for CORS) |
+
+---
+
 ## REST API Endpoints
 
 All endpoints return JSON with a consistent `status` and `result` or `message` field. Endpoints marked 🔒 require a valid `Authorization: Bearer <token>` header.
