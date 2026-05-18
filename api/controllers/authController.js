@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
 const conn = require('../utils/dbconn');
+const { isValidEmail } = require('../utils/validate');
 
 exports.register = (req, res) => {
-  // instead of destructuring, declaring each and normalising before query
   const name = req.body.name
     ? req.body.name.trim().replace(/\b\w/g, (c) => c.toUpperCase())
     : '';
@@ -13,18 +13,43 @@ exports.register = (req, res) => {
   const { password } = req.body;
 
   if (!name || !username || !email || !password) {
-    res.status(400);
-    return res.json({
+    return res.status(400).json({
       status: 'failure',
       message: 'All fields are required'
     });
   }
 
-  // hash pw w/ bcrypt (10 salt level for lots of protec)
+  if (name.length < 2 || name.length > 100) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Name must be between 2 and 100 characters'
+    });
+  }
+
+  if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Username must be 3–30 characters and contain only letters, numbers, or underscores'
+    });
+  }
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Invalid email address'
+    });
+  }
+
+  if (password.length < 8 || password.length > 128) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Password must be between 8 and 128 characters'
+    });
+  }
+
   bcrypt.hash(password, 10, (hashErr, hashedPassword) => {
     if (hashErr) {
-      res.status(500);
-      return res.json({
+      return res.status(500).json({
         status: 'failure',
         message: 'Password hashing failed'
       });
@@ -41,14 +66,13 @@ exports.register = (req, res) => {
       if (err) {
         console.error('Database error:', err);
 
-        // check for duplicate username/email
         if (err.code === 'ER_DUP_ENTRY') {
-          res.status(409).json({
+          return res.status(409).json({
             status: 'failure',
             message: 'Username or email already exists'
           });
         } else {
-          res.status(500).json({
+          return res.status(500).json({
             status: 'failure',
             message: err.message
           });
@@ -65,38 +89,39 @@ exports.register = (req, res) => {
 };
 
 exports.login = (req, res) => {
-  // instead of destructuring, declaring each and normalising before query
   const username = req.body.username
     ? req.body.username.trim().toLowerCase()
     : '';
   const { password } = req.body;
 
   if (!username || !password) {
-    res.status(400);
-    return res.json({
+    return res.status(400).json({
       status: 'failure',
       message: 'Username and password are required'
     });
   }
 
+  // prevent oversized payloads reaching bcrypt
+  if (username.length > 30 || password.length > 128) {
+    return res.status(401).json({
+      status: 'failure',
+      message: 'Invalid username or password'
+    });
+  }
+
   const selectSQL = `SELECT * FROM traders WHERE username = ?`;
 
-  const vals = [username];
-
-  conn.query(selectSQL, vals, (err, rows) => {
+  conn.query(selectSQL, [username], (err, rows) => {
     if (err) {
       console.error('Database error:', err);
-      res.status(500);
-      return res.json({
+      return res.status(500).json({
         status: 'failure',
         message: 'Server error'
       });
     }
 
-    // check if trader exists
     if (rows.length === 0) {
-      res.status(401);
-      return res.json({
+      return res.status(401).json({
         status: 'failure',
         message: 'Invalid username or password'
       });
@@ -104,25 +129,21 @@ exports.login = (req, res) => {
 
     const trader = rows[0];
 
-    // compare pw (submitted) with hashed pw (in db)
     bcrypt.compare(password, trader.password, (bcryptErr, match) => {
       if (bcryptErr) {
-        res.status(500);
-        return res.json({
+        return res.status(500).json({
           status: 'failure',
           message: 'Password verification failed'
         });
       }
 
       if (!match) {
-        res.status(401);
-        return res.json({
+        return res.status(401).json({
           status: 'failure',
           message: 'Invalid username or password'
         });
       }
 
-      // if pw correct:
       res.status(200).json({
         status: 'success',
         message: 'Login successful',

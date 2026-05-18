@@ -1,9 +1,9 @@
 const conn = require('../utils/dbconn');
+const { isValidEmail, isPositiveInt } = require('../utils/validate');
 
 exports.getBookingById = (req, res) => {
   const { id } = req.params;
 
-  // join services to get service title with booking
   const selectSQL = `
     SELECT b.*, s.title AS service_title
     FROM bookings b
@@ -14,23 +14,23 @@ exports.getBookingById = (req, res) => {
   conn.query(selectSQL, [id], (err, rows) => {
     if (err) {
       console.log('Database error:', err);
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
+    }
+
+    if (rows.length > 0) {
+      res.status(200).json({
+        status: 'success',
+        message: `Record retrieved for booking with ID: ${id}`,
+        result: rows[0]
+      });
     } else {
-      if (rows.length > 0) {
-        res.status(200).json({
-          status: 'success',
-          message: `Record retrieved for booking with ID: ${id}`,
-          result: rows[0]
-        });
-      } else {
-        res.status(404).json({
-          status: 'failure',
-          message: `No booking found with ID: ${id}`
-        });
-      }
+      res.status(404).json({
+        status: 'failure',
+        message: `No booking found with ID: ${id}`
+      });
     }
   });
 };
@@ -38,9 +38,6 @@ exports.getBookingById = (req, res) => {
 exports.getBookingsByTrader = (req, res) => {
   const { id } = req.params;
 
-  console.log(`Getting bookings for trader ID: ${id}`);
-
-  // ORDER BY ... DESC to return newest first
   const selectSQL = `
     SELECT b.*, s.title AS service_title
     FROM bookings b
@@ -52,17 +49,17 @@ exports.getBookingsByTrader = (req, res) => {
   conn.query(selectSQL, [id], (err, rows) => {
     if (err) {
       console.log('Database error:', err);
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
-    } else {
-      res.status(200).json({
-        status: 'success',
-        message: `${rows.length} bookings retrieved for trader ID: ${id}`,
-        result: rows
-      });
     }
+
+    res.status(200).json({
+      status: 'success',
+      message: `${rows.length} bookings retrieved for trader ID: ${id}`,
+      result: rows
+    });
   });
 };
 
@@ -89,11 +86,70 @@ exports.addBooking = (req, res) => {
     !requested_time ||
     !jobDescription
   ) {
-    res.status(400).json({
+    return res.status(400).json({
       status: 'failure',
       message: 'All fields are required'
     });
-    return;
+  }
+
+  if (!isPositiveInt(trader_id)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Invalid trader ID'
+    });
+  }
+
+  if (!isPositiveInt(service_id)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Invalid service ID'
+    });
+  }
+
+  if (!isValidEmail(clientEmail)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Invalid email address'
+    });
+  }
+
+  if (clientName.length > 100) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Client name must be 100 characters or fewer'
+    });
+  }
+
+  if (jobLocation.length > 255) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Job location must be 255 characters or fewer'
+    });
+  }
+
+  if (jobDescription.length > 1000) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Job description must be 1000 characters or fewer'
+    });
+  }
+
+  const bookingDate = new Date(requested_date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (isNaN(bookingDate.getTime()) || bookingDate < today) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Requested date must be valid and cannot be in the past'
+    });
+  }
+
+  if (!/^\d{2}:\d{2}$/.test(requested_time)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Requested time must be in HH:MM format'
+    });
   }
 
   const insertSQL = `
@@ -115,21 +171,20 @@ exports.addBooking = (req, res) => {
   conn.query(insertSQL, vals, (err, resultHeader) => {
     if (err) {
       console.log('Database error:', err);
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
-    } else {
-      res.status(201).json({
-        status: 'success',
-        message: `Booking submitted successfully with ID: ${resultHeader.insertId}`,
-        bookingId: resultHeader.insertId
-      });
     }
+
+    res.status(201).json({
+      status: 'success',
+      message: `Booking submitted successfully with ID: ${resultHeader.insertId}`,
+      bookingId: resultHeader.insertId
+    });
   });
 };
 
-// for trader to accent or reject booking from dashboard
 exports.updateBookingStatus = (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -137,11 +192,10 @@ exports.updateBookingStatus = (req, res) => {
   const validStatuses = ['pending', 'confirmed', 'rejected'];
 
   if (!status || !validStatuses.includes(status)) {
-    res.status(400).json({
+    return res.status(400).json({
       status: 'failure',
-      message: `Status must be: pending, confirmed or rejected`
+      message: 'Status must be: pending, confirmed or rejected'
     });
-    return;
   }
 
   const updateSQL = 'UPDATE bookings SET status = ? WHERE id = ?';
@@ -149,31 +203,29 @@ exports.updateBookingStatus = (req, res) => {
   conn.query(updateSQL, [status, id], (err, resultHeader) => {
     if (err) {
       console.error('Database error:', err);
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
-    } else {
-      if (resultHeader.affectedRows === 0) {
-        res.status(404).json({
-          status: 'failure',
-          message: `No booking found with ID: ${id}`
-        });
-      } else {
-        res.status(200).json({
-          status: 'success',
-          message: `Booking with ID: ${id} updated to ${status}`
-        });
-      }
     }
+
+    if (resultHeader.affectedRows === 0) {
+      return res.status(404).json({
+        status: 'failure',
+        message: `No booking found with ID: ${id}`
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: `Booking with ID: ${id} updated to ${status}`
+    });
   });
 };
 
-// return two stats: booking per serv (doughnut)
 exports.getTraderStats = (req, res) => {
   const { id } = req.params;
 
-  // for doughnut
   const bookingsPerServiceSQL = `
     SELECT s.title, COUNT(b.id) AS booking_count
     FROM bookings b
@@ -183,11 +235,6 @@ exports.getTraderStats = (req, res) => {
     ORDER BY booking_count DESC
   `;
 
-  // for stat card
-  /* 
-  inner query - groups by month
-  outer query - averages monthly totals
-  */
   const avgPerMonthSQL = `
     SELECT ROUND(AVG(monthly_count), 1) AS avg_per_month
     FROM (
@@ -198,7 +245,6 @@ exports.getTraderStats = (req, res) => {
     ) AS monthly
   `;
 
-  // first query to db
   conn.query(bookingsPerServiceSQL, [id], (err, serviceRows) => {
     if (err) {
       console.log('Database error:', err);
@@ -208,7 +254,6 @@ exports.getTraderStats = (req, res) => {
       });
     }
 
-    // nested query in callback of first quer
     conn.query(avgPerMonthSQL, [id], (err, avgRows) => {
       if (err) {
         console.log('Database error:', err);
@@ -218,12 +263,10 @@ exports.getTraderStats = (req, res) => {
         });
       }
 
-      // when both are done, send combined result
       res.status(200).json({
         status: 'success',
         result: {
           bookingsPerService: serviceRows,
-          // math floor the avg so it's a whole num
           avgBookingsPerMonth: Math.floor(avgRows[0].avg_per_month) || 0
         }
       });

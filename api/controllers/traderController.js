@@ -1,31 +1,30 @@
+const bcrypt = require('bcrypt');
 const conn = require('../utils/dbconn');
+const { isValidEmail } = require('../utils/validate');
 
 exports.getAllTraders = (req, res) => {
-  // only select whats needed for public-facing
   const selectSQL =
     'SELECT id, name, trade_type, region, bio, created_at FROM traders';
 
   conn.query(selectSQL, (err, rows) => {
     if (err) {
-      // console.log('Database error:', err);
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
-    } else {
-      res.status(200).json({
-        status: 'success',
-        message: `${rows.length} records retrieved`,
-        result: rows
-      });
     }
+
+    res.status(200).json({
+      status: 'success',
+      message: `${rows.length} records retrieved`,
+      result: rows
+    });
   });
 };
 
 exports.getTraderById = (req, res) => {
   const { id } = req.params;
 
-  // same as above - only public fields
   const selectSQL = `
     SELECT id, name, trade_type, region, bio, created_at
     FROM traders
@@ -34,64 +33,89 @@ exports.getTraderById = (req, res) => {
 
   conn.query(selectSQL, [id], (err, rows) => {
     if (err) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
+    }
+
+    if (rows.length > 0) {
+      res.status(200).json({
+        status: 'success',
+        message: `Record retrieved for trader with ID: ${id}`,
+        result: rows[0]
+      });
     } else {
-      if (rows.length > 0) {
-        res.status(200).json({
-          status: 'success',
-          message: `Record retrieved for trader with ID: ${id}`,
-          result: rows[0]
-        });
-      } else {
-        res.status(404).json({
-          status: 'failure',
-          message: `No trader found with ID: ${id}`
-        });
-      }
+      res.status(404).json({
+        status: 'failure',
+        message: `No trader found with ID: ${id}`
+      });
     }
   });
 };
 
 exports.addTrader = (req, res) => {
-  const { name, username, email, password } = req.body;
+  const name = req.body.name
+    ? req.body.name.trim().replace(/\b\w/g, (c) => c.toUpperCase())
+    : '';
+  const username = req.body.username
+    ? req.body.username.trim().toLowerCase()
+    : '';
+  const email = req.body.email ? req.body.email.trim().toLowerCase() : '';
+  const { password } = req.body;
 
   if (!name || !username || !email || !password) {
-    res.status(400).json({
+    return res.status(400).json({
       status: 'failure',
       message: 'All fields required'
     });
-    return;
   }
 
-  const insertSQL =
-    'INSERT INTO traders (name, username, email, password) VALUES (?, ?, ?, ?)';
+  if (!isValidEmail(email)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Invalid email address'
+    });
+  }
 
-  const vals = [name, username, email, password];
+  if (password.length < 8 || password.length > 128) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Password must be between 8 and 128 characters'
+    });
+  }
 
-  conn.query(insertSQL, vals, (err, resultHeader) => {
-    if (err) {
-      // catch duplicates
-      if (err.code === 'ER_DUP_ENTRY') {
-        res.status(409).json({
-          status: 'failure',
-          message: 'Username or email already exists'
-        });
-      } else {
-        res.status(500).json({
+  bcrypt.hash(password, 10, (hashErr, hashedPassword) => {
+    if (hashErr) {
+      return res.status(500).json({
+        status: 'failure',
+        message: 'Password hashing failed'
+      });
+    }
+
+    const insertSQL =
+      'INSERT INTO traders (name, username, email, password) VALUES (?, ?, ?, ?)';
+
+    conn.query(insertSQL, [name, username, email, hashedPassword], (err, resultHeader) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({
+            status: 'failure',
+            message: 'Username or email already exists'
+          });
+        }
+        return res.status(500).json({
           status: 'failure',
           message: err.message
         });
       }
-    } else {
+
       res.status(201).json({
         status: 'success',
         message: 'Trader registered successfully',
         traderId: resultHeader.insertId
       });
-    }
+    });
   });
 };
 
@@ -101,9 +125,10 @@ exports.editTrader = (req, res) => {
     ? req.body.name.trim().replace(/\b\w/g, (c) => c.toUpperCase())
     : '';
   const email = req.body.email ? req.body.email.trim().toLowerCase() : '';
-  const { trade_type, region, bio } = req.body;
+  const bio = req.body.bio ? req.body.bio.trim() : null;
+  const trade_type = req.body.trade_type ? req.body.trade_type.trim() : null;
+  const region = req.body.region ? req.body.region.trim() : null;
 
-  // only name and email are required
   if (!name || !email) {
     return res.status(400).json({
       status: 'failure',
@@ -111,25 +136,51 @@ exports.editTrader = (req, res) => {
     });
   }
 
+  if (name.length < 2 || name.length > 100) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Name must be between 2 and 100 characters'
+    });
+  }
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Invalid email address'
+    });
+  }
+
+  if (trade_type && trade_type.length > 100) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Trade type must be 100 characters or fewer'
+    });
+  }
+
+  if (region && region.length > 100) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Region must be 100 characters or fewer'
+    });
+  }
+
+  if (bio && bio.length > 1000) {
+    return res.status(400).json({
+      status: 'failure',
+      message: 'Bio must be 1000 characters or fewer'
+    });
+  }
+
   const updateSQL = `
-    UPDATE traders 
+    UPDATE traders
     SET name = ?, email = ?, trade_type = ?, region = ?, bio = ?
     WHERE id = ?
   `;
 
-  // optional fields have 'null' as fallback if not in req.body
-  const vals = [
-    name,
-    email,
-    trade_type || null,
-    region || null,
-    bio || null,
-    id
-  ];
+  const vals = [name, email, trade_type, region, bio, id];
 
   conn.query(updateSQL, vals, (err, resultHeader) => {
     if (err) {
-      // catch if they try to change to an already registered email
       if (err.code === 'ER_DUP_ENTRY') {
         return res.status(409).json({
           status: 'failure',
@@ -137,19 +188,19 @@ exports.editTrader = (req, res) => {
         });
       }
       return res.status(500).json({ status: 'failure', message: err.message });
-    } else {
-      if (resultHeader.length === 0) {
-        res.status(404).json({
-          status: 'failure',
-          message: `No trader found with ID: ${id}`
-        });
-      } else {
-        res.status(200).json({
-          status: 'success',
-          message: `Trader ${id} updated`
-        });
-      }
     }
+
+    if (resultHeader.affectedRows === 0) {
+      return res.status(404).json({
+        status: 'failure',
+        message: `No trader found with ID: ${id}`
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: `Trader ${id} updated`
+    });
   });
 };
 
@@ -160,27 +211,26 @@ exports.deleteTrader = (req, res) => {
 
   conn.query(deleteSQL, [id], (err, resultHeader) => {
     if (err) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
-    } else {
-      if (resultHeader.affectedRows === 0) {
-        res.status(404).json({
-          status: 'failure',
-          message: `No trader found with ID: ${id}`
-        });
-      } else {
-        res.status(200).json({
-          status: 'success',
-          message: `Trader with ID: ${id} deleted successfully`
-        });
-      }
     }
+
+    if (resultHeader.affectedRows === 0) {
+      return res.status(404).json({
+        status: 'failure',
+        message: `No trader found with ID: ${id}`
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: `Trader with ID: ${id} deleted successfully`
+    });
   });
 };
 
-// protected - only for dash to get full prof info
 exports.getTraderProfileInfoById = (req, res) => {
   const { id } = req.params;
 
@@ -192,23 +242,23 @@ exports.getTraderProfileInfoById = (req, res) => {
 
   conn.query(selectSQL, [id], (err, rows) => {
     if (err) {
-      res.status(500).json({
+      return res.status(500).json({
         status: 'failure',
         message: err.message
       });
+    }
+
+    if (rows.length > 0) {
+      res.status(200).json({
+        status: 'success',
+        message: `Record retrieved for trader with ID: ${id}`,
+        result: rows[0]
+      });
     } else {
-      if (rows.length > 0) {
-        res.status(200).json({
-          status: 'success',
-          message: `Record retrieved for trader with ID: ${id}`,
-          result: rows[0]
-        });
-      } else {
-        res.status(404).json({
-          status: 'failure',
-          message: `No trader found with ID: ${id}`
-        });
-      }
+      res.status(404).json({
+        status: 'failure',
+        message: `No trader found with ID: ${id}`
+      });
     }
   });
 };
