@@ -1,4 +1,8 @@
-const dotenv = require('dotenv').config({ path: './config.env' });
+// const dotenv = require('dotenv').config({ path: './config.env' });
+const dotenv = require('dotenv').config({
+  path: './config.env',
+  override: false
+});
 const app = require('./app');
 
 app.listen(process.env.PORT, (err) => {
