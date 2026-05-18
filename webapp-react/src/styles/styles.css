@@ -1044,8 +1044,20 @@ details[open] .chevron-icon {
   margin-top: 0.75rem;
 }
 
-.services-overflow-link a {
+.services-overflow-link a,
+.services-overflow-link button {
   color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.service-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .no-actions-text {
@@ -1076,6 +1088,11 @@ details[open] .chevron-icon {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
 }
 
 .dashboard-tab:hover {
@@ -1222,23 +1239,32 @@ details[open] .chevron-icon {
   color: var(--brand);
 }
 
-.dash-card-header a {
+.dash-card-header a,
+.dash-card-header button {
   font-size: 0.85rem;
   color: var(--brand);
   font-weight: 600;
   text-decoration: none;
   transition: opacity 0.2s;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .dash-card-header.bookings-preview a,
+.dash-card-header.bookings-preview button,
 .dash-card-header.services-preview a,
+.dash-card-header.services-preview button,
 .dash-card-header.bookings-preview i,
 .dash-card-header.services-preview i {
   color: var(--accent);
 }
 
 .dash-card-header.bookings-preview a:hover,
-.dash-card-header.services-preview a:hover {
+.dash-card-header.bookings-preview button:hover,
+.dash-card-header.services-preview a:hover,
+.dash-card-header.services-preview button:hover {
   opacity: 0.8;
 }
 
@@ -1418,6 +1444,8 @@ details[open] .chevron-icon {
   border: 1px solid #1a1a2e6d;
   color: #666;
   transition: all 0.15s;
+  background: none;
+  cursor: pointer;
 }
 
 .filter-tab:hover {
@@ -1534,6 +1562,17 @@ details[open] .chevron-icon {
 /* -- media queries */
 
 /* tablet — 768px */
+/* tablet — columns stack, chart card must not use height: 100% */
+@media (max-width: 1023px) {
+  .dash-card-full-height {
+    height: auto;
+  }
+
+  .chart-container {
+    padding-bottom: 0.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   /* navbar */
   .navbar {
@@ -1565,6 +1604,7 @@ details[open] .chevron-icon {
   .nav-right.open {
     display: flex;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    border-bottom: 3px solid var(--accent);
   }
 
   .nav-right a,
@@ -1670,6 +1710,14 @@ details[open] .chevron-icon {
   .service-actions {
     display: flex;
     flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .booking-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
   }
 
   .back-link-container {

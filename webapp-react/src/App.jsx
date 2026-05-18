@@ -19,23 +19,6 @@ const App = () => {
           path="/"
           element={
             <MainLayout>
-              {/* <div
-                className="error-404-container"
-                style={{ flexDirection: 'column' }}
-              >
-                <h2
-                  style={{
-                    color: 'white',
-                    fontFamily: 'var(--special-font)',
-                    fontSize: '2.5rem'
-                  }}
-                >
-                  Home page coming soon 🚧
-                </h2>
-                <p style={{ color: '#aaa', fontSize: '1.1rem' }}>
-                  Check back in a bit!
-                </p>
-              </div> */}
               <HomePage />
             </MainLayout>
           }

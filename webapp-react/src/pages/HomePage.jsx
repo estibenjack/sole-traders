@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import FeatureCard from '../components/home/FeatureCard';
+import { useAuth } from '../context/AuthContext';
 
 const HomePage = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <>
       {/* hero */}
@@ -15,8 +18,8 @@ const HomePage = () => {
           <Link to="/traders" className="btn-primary">
             Browse Traders
           </Link>
-          <Link to="/register" className="btn-outline">
-            Join as a Trader
+          <Link to={isAuthenticated ? '/dashboard' : '/register'} className="btn-outline">
+            {isAuthenticated ? 'Go to Dashboard' : 'Join as a Trader'}
           </Link>
         </div>
       </section>
@@ -62,8 +65,8 @@ const HomePage = () => {
           Join thousands of tradespeople already using Sole Traders to manage
           bookings and grow their business.
         </p>
-        <Link to="/register" className="btn-primary">
-          Create a free account
+        <Link to={isAuthenticated ? '/dashboard' : '/register'} className="btn-primary">
+          {isAuthenticated ? 'Go to Dashboard' : 'Create a free account'}
         </Link>
       </section>
     </>

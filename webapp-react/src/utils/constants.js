@@ -1,0 +1,43 @@
+export const TRADE_TYPES = [
+  'Carpenter',
+  'Electrician',
+  'Flooring Specialist',
+  'Gardener & Landscaper',
+  'General Builder',
+  'Glazier',
+  'Heating Engineer',
+  'Painter & Decorator',
+  'Plasterer',
+  'Plumber',
+  'Roofer',
+  'Tiler'
+];
+
+export const NI_REGIONS = [
+  'Antrim',
+  'Armagh',
+  'Ballymena',
+  'Ballymoney',
+  'Banbridge',
+  'Belfast',
+  'Carrickfergus',
+  'Castlereagh',
+  'Coleraine',
+  'Cookstown',
+  'Craigavon',
+  'Derry',
+  'Down',
+  'Dungannon',
+  'Fermanagh',
+  'Larne',
+  'Limavady',
+  'Lisburn',
+  'Magherafelt',
+  'Moyle',
+  'Newry & Mourne',
+  'Newtownabbey',
+  'Newtownards',
+  'North Down',
+  'Omagh',
+  'Strabane'
+];
