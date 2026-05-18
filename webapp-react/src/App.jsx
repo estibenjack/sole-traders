@@ -7,6 +7,8 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import TraderProfilePage from './pages/TraderProfilePage';
+import DashboardPage from './pages/DashboardPage';
+import ProtectedRoute from './components/ui/ProtectedRoute';
 
 const App = () => {
   return (
@@ -76,6 +78,16 @@ const App = () => {
             <FullHeightLayout variant="register">
               <RegisterPage />
             </FullHeightLayout>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <DashboardPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
       </Routes>

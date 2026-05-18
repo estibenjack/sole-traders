@@ -181,7 +181,7 @@ const BrowseTradersPage = () => {
               </div>
             ) : (
               <div className="empty-msg browse-traders">
-                <i class="fa-solid fa-hard-hat"></i>
+                <i className="fa-solid fa-hard-hat"></i>
                 <h3>No traders found :&#40;</h3>
                 <p>Try adjusting your filters or check back soon.</p>
                 <button className="btn-outline-dark" onClick={clearFilters}>

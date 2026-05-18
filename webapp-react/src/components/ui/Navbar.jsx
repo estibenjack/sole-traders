@@ -1,6 +1,15 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <nav className="navbar">
       <Link to="/" className="logo">
@@ -15,10 +24,19 @@ const Navbar = () => {
         <i className="fa-solid fa-bars"></i>
       </button>
 
-      {/* add logged-in links like dashboard and in/out later */}
       <div className="nav-right" id="navMenu">
         <Link to="/">Home</Link>
         <Link to="/traders">Browse Traders</Link>
+        {isAuthenticated ? (
+          <>
+            <Link to="/dashboard">Dashboard</Link>
+            <button onClick={handleLogout}>
+              Log out
+            </button>
+          </>
+        ) : (
+          <Link to="/login">Log in</Link>
+        )}
       </div>
     </nav>
   );

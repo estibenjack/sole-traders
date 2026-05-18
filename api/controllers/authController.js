@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const conn = require('../utils/dbconn');
 const { isValidEmail } = require('../utils/validate');
 
@@ -144,9 +145,13 @@ exports.login = (req, res) => {
         });
       }
 
+      const payload = { id: trader.id, username: trader.username, name: trader.name };
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
       res.status(200).json({
         status: 'success',
         message: 'Login successful',
+        token,
         result: {
           id: trader.id,
           username: trader.username,

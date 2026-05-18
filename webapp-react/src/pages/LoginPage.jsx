@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     username: '',
@@ -21,8 +23,7 @@ const LoginPage = () => {
       .post('http://localhost:3002/login', form)
       .then((res) => {
         if (res.data.status === 'success') {
-          // will handle auth and redirect to dashboard once JWT is set up
-          console.log('Login successful:', res.data.result);
+          login(res.data.result, res.data.token);
           navigate('/dashboard');
         }
       })
