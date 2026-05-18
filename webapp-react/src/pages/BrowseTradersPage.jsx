@@ -78,7 +78,7 @@ const BrowseTradersPage = () => {
     setSelectedRegion('');
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div className="loading-state">Loading...</div>;
   if (error) return <p>{error}</p>;
 
   return (

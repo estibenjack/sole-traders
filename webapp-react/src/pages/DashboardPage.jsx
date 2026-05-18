@@ -62,7 +62,7 @@ const DashboardPage = () => {
     fetchData();
   }, [user?.id, token, refreshKey]);
 
-  if (loading) return <p className="p-4">Loading...</p>;
+  if (loading) return <div className="loading-state">Loading...</div>;
   if (error) return <p className="p-4">{error}</p>;
   if (!trader) return null;
 
